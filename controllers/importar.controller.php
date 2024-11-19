@@ -4,23 +4,39 @@ require_once __DIR__ . "/../models/importar.models.php";
 class ControllerImportar{
     private $operacoesPossiveis = ['SELECT', 'SHOW', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP'];
     private $operacoesSQL = [
-        'SELECT' => '/FROM\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
+        'SELECT' => '/FROM\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
         'SHOW' => '/SHOW\s+TABLES\s+FROM\s+`?([a-zA-Z0-9_]+)`?/i',
-        'INSERT' => '/INSERT\s+INTO\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
-        'UPDATE' => '/UPDATE\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
-        'DELETE' => '/DELETE\s+FROM\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
-        'CREATE' => '/CREATE\s+TABLE\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
-        'ALTER' => '/ALTER\s+TABLE\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i',
-        'DROP' => '/DROP\s+TABLE\s+`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?/i'
+        'INSERT' => '/INSERT\s+INTO\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
+        'UPDATE' => '/UPDATE\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
+        'DELETE' => '/DELETE\s+FROM\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
+        'CREATE' => '/CREATE\s+TABLE\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
+        'ALTER' => '/ALTER\s+TABLE\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i',
+        'DROP' => '/DROP\s+TABLE\s+`?([a-zA-Z0-9_]+)`?(?:\.`?([a-zA-Z0-9_]+)`?)?/i'
     ];
 
     public function gerarOpcoesFormulario() {
+        echo '<div class="form-check">';
+        echo '<input class="form-check-input" type="checkbox" id="checkAll" onclick="toggleCheckboxes(this)">';
+        echo '<label class="form-check-label" for="checkAll">Marcar todos</label>';
+        echo '</div>';
+        echo '<script>
+            function toggleCheckboxes(source) {
+            checkboxes = document.querySelectorAll(".form-check-input");
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i] != source) {
+                checkboxes[i].checked = source.checked;
+                }
+            }
+            }
+        </script>';
+
         foreach ($this->operacoesPossiveis as $operacao) {
             echo '<div class="form-check">';
             echo '<input class="form-check-input" type="checkbox" name="' . strtolower($operacao) . 'Check" id="' . strtolower($operacao) . 'Check">';
             echo '<label class="form-check-label" for="' . strtolower($operacao) . 'Check">' . $operacao . '</label>';
             echo '</div>';
         }
+
     }
 
     private function obterTabelaPrincipal($sql) {
@@ -212,3 +228,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller = new ControllerImportar();
     $controller->processarFormulario();
 }
+?>
