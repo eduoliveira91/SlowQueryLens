@@ -78,6 +78,33 @@
 
 <body class="hold-trasition skin-blue sidebar-collapse sidebar-mini login-page">
 
+<div id="ajaxLoadingModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <i class="fa fa-refresh fa-spin fa-3x"></i>
+        <p>Processando...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ajaxStart(function() {
+    $("#ajaxLoadingModal").modal('show');
+  }).ajaxStop(function() {
+    $("#ajaxLoadingModal").modal('hide');
+  });
+
+  function copyToClipboard(elementId) {
+    var copyText = document.getElementById(elementId);
+    copyText.select();
+    document.execCommand("copy");
+  }
+</script>
+
+ 
+
 <?php
 
 //if(isset($_SESSION["startSession"]) && $_SESSION["startSession"] == "ok"){

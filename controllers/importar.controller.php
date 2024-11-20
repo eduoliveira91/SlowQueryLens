@@ -15,25 +15,28 @@ class ControllerImportar{
     ];
 
     public function gerarOpcoesFormulario() {
-        echo '<div class="form-check">';
-        echo '<input class="form-check-input" type="checkbox" id="checkAll" onclick="toggleCheckboxes(this)">';
-        echo '<label class="form-check-label" for="checkAll">Marcar todos</label>';
-        echo '</div>';
         echo '<script>
-            function toggleCheckboxes(source) {
-            checkboxes = document.querySelectorAll(".form-check-input");
-            for (var i = 0; i < checkboxes.length; i++) {
+                function toggleCheckboxes(source) {
+                checkboxes = document.querySelectorAll(".form-check-input");
+                for (var i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i] != source) {
                 checkboxes[i].checked = source.checked;
                 }
-            }
-            }
-        </script>';
+                }
+                }
+            </script>';
+          
+        echo '<div class="form-check">';
+        echo '<label class="form-check-label" for="checkAll">';
+        echo '<input class="form-check-input" type="checkbox" id="checkAll" onclick="toggleCheckboxes(this)"> Marcar todos';
+        echo '</label>';
+        echo '</div>';
 
         foreach ($this->operacoesPossiveis as $operacao) {
             echo '<div class="form-check">';
-            echo '<input class="form-check-input" type="checkbox" name="' . strtolower($operacao) . 'Check" id="' . strtolower($operacao) . 'Check">';
-            echo '<label class="form-check-label" for="' . strtolower($operacao) . 'Check">' . $operacao . '</label>';
+            echo '<label class="form-check-label" for="' . strtolower($operacao) . 'Check">';
+            echo '<input class="form-check-input" type="checkbox" name="' . strtolower($operacao) . 'Check" id="' . strtolower($operacao) . 'Check"> ' . $operacao;
+            echo '</label>';
             echo '</div>';
         }
 
@@ -112,12 +115,20 @@ class ControllerImportar{
 
                 } elseif (preg_match('/Start: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/', $linha, $matches)) {
                     $entradaLog['start'] = $matches[1];
-
                 } elseif (preg_match('/End: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/', $linha, $matches)) {
                     $entradaLog['end'] = $matches[1];
-
                 } elseif (preg_match('/(select .*|set .*|show .*)/i', $linha, $matches)) {
-                    $entradaLog['query'] = trim($matches[1]);
+                    $query = $matches[1];
+                    
+                    // Tratar quebras de linha no comando SQL
+                    while (($linha = fgets($arquivo)) !== false) {
+                        $query .= ' ' . trim($linha);
+                        if (preg_match('/;$/', $linha)) {
+                            break;
+                        }
+                    }
+
+                    $entradaLog['query'] = trim($query);
                     $entradaLog['main_table'] = $this->obterTabelaPrincipal($entradaLog['query']);
                     
                     // Filtra as operações selecionadas
@@ -177,12 +188,12 @@ class ControllerImportar{
         $resultado = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (empty($_FILES['fileInput']['name'])) {
+            if (empty($_FILES['arquivolog']['name'])) {
                 $resultado['success'] = false;
                 $resultado['error'] = 'O arquivo de logs deve ser informado!';
-            } elseif (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
-                $caminhoArquivo = $_FILES['fileInput']['tmp_name'];
-                $extensaoArquivo = pathinfo($_FILES['fileInput']['name'], PATHINFO_EXTENSION);
+            } elseif (isset($_FILES['arquivolog']) && $_FILES['arquivolog']['error'] === UPLOAD_ERR_OK) {
+                $caminhoArquivo = $_FILES['arquivolog']['tmp_name'];
+                $extensaoArquivo = pathinfo($_FILES['arquivolog']['name'], PATHINFO_EXTENSION);
 
                 if ($extensaoArquivo !== 'log') {
                     $resultado['success'] = false;

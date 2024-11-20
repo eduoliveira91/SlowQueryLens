@@ -26,29 +26,27 @@ require_once "controllers/importar.controller.php";
       <div class="box-body">
         <div class="row">
           <div class="col-md-6">
-            <form class="form-horizontal" id="formImportar" enctype="multipart/form-data">            
-              <label for="fileInput">Arquivo</label>
-              <div class="input-group">
-                <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="fileInput" name="fileInput">
-                  <label class="custom-file-label" for="fileInput">Escolher arquivo</label>
+            <form role="form" id="formImportar" enctype="multipart/form-data">            
+              <div class="box-body">
+              <div class="form-group">
+                  <label for="arquivolog">Arquivo</label>
+                  <input type="file" name="arquivolog" id="arquivolog">
+                  <p class="help-block">Informe um arquivo com extensão .log</p>
                 </div>
-                <div class="input-group-append">
-                  <span class="input-group-text">Upload</span>
+                <div class="form-group">
+                  <label>Operações</label>
+                  <div class="scrollable-checkboxes border p-1">
+                  <?php
+                  $controller = new ControllerImportar();
+                  $controller->gerarOpcoesFormulario();
+                  ?>
+                  </div>
                 </div>
-              </div>
-              <div class="input-group">
-                <label>Operações</label>
-                <div class="scrollable-checkboxes border p-2">
-                <?php
-                $controller = new ControllerImportar();
-                $controller->gerarOpcoesFormulario();
-                ?>
-                </div>
-              </div>
-              <div class="card-footer">
-                  <button type="button" id="btImportar" class="btn btn-primary">Enviar</button>
+              </div>  
+              <div class="box-footer">
+                  <button type="button" id="btImportar" class="btn btn-primary">Importar</button>
               </div>              
+
             </form>
           </div>
           <!-- /.row -->
@@ -61,12 +59,13 @@ require_once "controllers/importar.controller.php";
     <div class="box">
       <div class="box-header with-border">
         <h3 class="box-title">Logs de importação</h3>
+        <button type="button" class="btn btn-primary btn-xs pull-right" onclick="copyToClipboard('logList')">Copiar</button>
       </div>
       <!-- /.box-header -->
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
-            <textarea id="logList" class="form-control" rows="10" readonly style="resize: none;"></textarea>
+            <textarea id="logList" class="form-control" rows="10" readonly></textarea>
           </div>
         </div>
         <!-- /.box-body -->

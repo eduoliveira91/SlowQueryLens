@@ -8,7 +8,7 @@ class ModelsImportar {
 		CREATE TABLE IF NOT EXISTS slow_logs (
 			insert_id BIGINT AUTO_INCREMENT PRIMARY KEY, 
 			last_insert_id BIGINT NOT NULL,
-			start_time TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+			time TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
 			user_host MEDIUMTEXT NOT NULL,
 			query_time TIME(6) NOT NULL,
 			lock_time TIME(6) NOT NULL,
@@ -41,7 +41,7 @@ class ModelsImportar {
 		)";
 		$pdo->exec($sql);
 	
-		$pdo->exec("CREATE INDEX idx_slow_logs_start_time ON slow_logs(start_time)");
+		$pdo->exec("CREATE INDEX idx_slow_logs_time ON slow_logs(time)");
 		$pdo->exec("CREATE INDEX idx_slow_logs_user_host ON slow_logs(user_host(255))");
 		$pdo->exec("CREATE INDEX idx_slow_logs_query_time ON slow_logs(query_time)");
 		$pdo->exec("CREATE INDEX idx_slow_logs_lock_time ON slow_logs(lock_time)");
@@ -65,9 +65,9 @@ class ModelsImportar {
 
 		$stmt = $pdo->prepare("
 			INSERT INTO slow_logs (
-				start_time, user_host, query_time, lock_time, rows_sent, rows_examined, db, last_insert_id, server_id, sql_text, thread_id, errno, killed, bytes_received, bytes_sent, read_first, read_last, read_key, read_next, read_prev, read_rnd, read_rnd_next, sort_merge_passes, sort_range_count, sort_rows, sort_scan_count, created_tmp_disk_tables, created_tmp_tables, start, end, main_table
+				time, user_host, query_time, lock_time, rows_sent, rows_examined, db, last_insert_id, server_id, sql_text, thread_id, errno, killed, bytes_received, bytes_sent, read_first, read_last, read_key, read_next, read_prev, read_rnd, read_rnd_next, sort_merge_passes, sort_range_count, sort_rows, sort_scan_count, created_tmp_disk_tables, created_tmp_tables, start, end, main_table
 			) VALUES (
-				:start_time, :user_host, :query_time, :lock_time, :rows_sent, :rows_examined, :db, LAST_INSERT_ID(), :server_id, :sql_text, :thread_id, :errno, :killed, :bytes_received, :bytes_sent, :read_first, :read_last, :read_key, :read_next, :read_prev, :read_rnd, :read_rnd_next, :sort_merge_passes, :sort_range_count, :sort_rows, :sort_scan_count, :created_tmp_disk_tables, :created_tmp_tables, :start, :end, :main_table
+				:time, :user_host, :query_time, :lock_time, :rows_sent, :rows_examined, :db, LAST_INSERT_ID(), :server_id, :sql_text, :thread_id, :errno, :killed, :bytes_received, :bytes_sent, :read_first, :read_last, :read_key, :read_next, :read_prev, :read_rnd, :read_rnd_next, :sort_merge_passes, :sort_range_count, :sort_rows, :sort_scan_count, :created_tmp_disk_tables, :created_tmp_tables, :start, :end, :main_table
 			)
 		");
 		
@@ -78,7 +78,7 @@ class ModelsImportar {
 			}
 
 			$stmt->execute([
-				':start_time' => isset($reg['time']) 
+				':time' => isset($reg['time']) 
 					? (
 						($date = DateTime::createFromFormat('ymd H:i:s', $reg['time']) ?: DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['time'])) 
 						? $date->format('Y-m-d H:i:s') 
@@ -86,8 +86,8 @@ class ModelsImportar {
 					) 
 					: '1970-01-01 00:00:01',
 				':user_host' => isset($reg['user']) && isset($reg['host']) ? $reg['user'] . '@' . $reg['host'] : null,
-				':query_time' => isset($reg['query_time']) ? gmdate('H:i:s.u', $reg['query_time']) : null,
-				':lock_time' => isset($reg['lock_time']) ? gmdate('H:i:s.u', $reg['lock_time']) : null,
+				':query_time' => isset($reg['query_time']) ? gmdate('H:i:s', (int)($reg['query_time'] * 3600)) . sprintf(".%06d", (int)(($reg['query_time'] * 1000000) % 1000000)) : null,
+				':lock_time' => isset($reg['lock_time']) ? gmdate('H:i:s', (int)($reg['lock_time'] * 3600)) . sprintf(".%06d", (int)(($reg['lock_time'] * 1000000) % 1000000)) : null,
 				':rows_sent' => $reg['rows_sent'] ?? null,
 				':rows_examined' => $reg['rows_examined'] ?? null,
 				':db' => $reg['db'] ?? null,
