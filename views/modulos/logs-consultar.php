@@ -178,8 +178,25 @@ require_once "models/consultar.models.php";
             responsive: true,
             autoWidth: false,
             language: {
-              url: "//cdn.datatables.net/plug-ins/1.11.5/i18n/Portuguese-Brasil.json" // Altere conforme necessário
-            }
+              sProcessing: "Processando...",
+              sLengthMenu: "Mostrar _MENU_ registros",
+              sZeroRecords: "Nenhum resultado encontrado",
+              sEmptyTable: "Não há dados disponíveis nesta tabela",
+              sInfo: "Mostrando registros de _START_ a _END_ de um total de _TOTAL_",
+              sInfoEmpty: "Mostrando registros de 0 a 0 de um total de 0",
+              sInfoFiltered: "(filtrando um total de registros _MAX_)",
+              sSearch: "Pesquisar:",
+              oPaginate: {
+                sFirst: "Primeiro",
+                sLast: "Último",
+                sNext: "Próximo",
+                sPrevious: "Anterior"
+              },
+              oAria: {
+                sSortAscending: ": Ativar para ordenar a coluna crescente",
+                sSortDescending: ": Ativar para ordenar a coluna decrescente"
+              }
+            }            
           });          
         }
       },
