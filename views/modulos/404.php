@@ -6,7 +6,7 @@
     </h1>
     <ol class="breadcrumb">
       <li><a href="inicio"><i class="fa fa-dashboard"></i> Inicio</a></li>
-      <li class="active">Página não Encontrada</li>
+      <li class="active">Página não encontrada</li>
     </ol>
   </section>
 

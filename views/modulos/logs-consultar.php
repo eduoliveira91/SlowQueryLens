@@ -17,53 +17,62 @@ require_once "models/consultar.models.php";
   <section class="content">
  
   <div class="box">
-  <div class="box-header with-border">
-  <div class="row">
-  <div class="col-md-6">
-  <div class="form-group">
-    <label for="columnFilter1">Filtrar Colunas (1-15):</label>
-    <div id="columnFilter1" class="form-control" style="height: 200px; overflow-y: scroll;">
-    <label><input type="checkbox" class="column-toggle" data-column="30" checked> time</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="1" checked> user_host</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="2" checked> query_time</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="3" checked> lock_time</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="4" checked> rows_sent</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="5" checked> rows_examined</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="6" checked> db</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="7" checked> server_id</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="8" checked> sql_text</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="9" checked> thread_id</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="10" checked> errno</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="11" checked> killed</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="12" checked> bytes_received</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="13" checked> bytes_sent</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="14" checked> read_first</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="15" checked> read_last</label><br>
+    <div class="box-header with-border">
+      <h3 class="box-title">Filtrar Colunas</h3>
     </div>
-  </div>
-  </div>
-  <div class="col-md-6">
-  <div class="form-group">
-    <label for="columnFilter2">Filtrar Colunas (16-30):</label>
-    <div id="columnFilter2" class="form-control" style="height: 200px; overflow-y: scroll;">
-    <label><input type="checkbox" class="column-toggle" data-column="16" checked> read_key</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="17" checked> read_next</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="18" checked> read_prev</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="19" checked> read_rnd</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="20" checked> read_rnd_next</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="21" checked> sort_merge_passes</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="22" checked> sort_range_count</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="23" checked> sort_rows</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="24" checked> sort_scan_count</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="25" checked> created_tmp_disk_tables</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="26" checked> created_tmp_tables</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="27" checked> start</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="28" checked> end</label><br>
-    <label><input type="checkbox" class="column-toggle" data-column="29" checked> main_table</label><br>
+    <div class="box-body">
+      <form id="columnFilterForm">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="columnFilter1">Filtrar Colunas (1-15):</label>
+              <div id="columnFilter1" class="form-control" style="height: 200px; overflow-y: scroll;">
+                <label><input type="checkbox" class="column-toggle" data-column="time" checked> time</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="user_host" checked> user_host</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="thread_id" checked> thread_id</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="name_schema" checked> name_schema</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="query_time" checked> query_time</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="lock_time" checked> lock_time</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="rows_sent" checked> rows_sent</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="rows_examined" checked> rows_examined</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="rows_affected" checked> rows_affected</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="bytes_sent" checked> bytes_sent</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="sql_text" checked> sql_text</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="main_table" checked> main_table</label><br>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="columnFilter2">Filtrar Colunas (16-30):</label>
+              <div id="columnFilter2" class="form-control" style="height: 200px; overflow-y: scroll;">
+                <label><input type="checkbox" class="column-toggle" data-column="errno" checked> errno</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="killed" checked> killed</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="bytes_received" checked> bytes_received</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_first" checked> read_first</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_last" checked> read_last</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_key" checked> read_key</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_next" checked> read_next</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_prev" checked> read_prev</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_rnd" checked> read_rnd</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="read_rnd_next" checked> read_rnd_next</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="sort_merge_passes" checked> sort_merge_passes</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="sort_range_count" checked> sort_range_count</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="sort_rows" checked> sort_rows</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="sort_scan_count" checked> sort_scan_count</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="created_tmp_disk_tables" checked> created_tmp_disk_tables</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="created_tmp_tables" checked> created_tmp_tables</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="start" checked> start</label><br>
+                <label><input type="checkbox" class="column-toggle" data-column="end" checked> end</label><br>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <button id="btConsultar" class="btn btn-primary">Consultar</button>
+        </div>
+      </form>
     </div>
-  </div>
-  </div>
-  </div>
   </div>
 
   <script>
@@ -89,27 +98,28 @@ require_once "models/consultar.models.php";
   });
   });
   </script>
-  </div>
+  
 
-  <div class="box-body">
+  <div class="box-body" id="logsTableContainer">
   <table class="table table-bordered table-striped dt-responsive tables" width="100%">
   <thead>
   <tr>
   <th style="width:10px">ID</th>
   <th>time</th>
   <th>user_host</th>
+  <th>thread_id</th>
+  <th>name_schema</th>
   <th>query_time</th>
   <th>lock_time</th>
   <th>rows_sent</th>
   <th>rows_examined</th>
-  <th>db</th>
-  <th>server_id</th>
+  <th>rows_affected</th>
+  <th>bytes_sent</th>
   <th>sql_text</th>
-  <th>thread_id</th>
+  <th>main_table</th>
   <th>errno</th>
   <th>killed</th>
   <th>bytes_received</th>
-  <th>bytes_sent</th>
   <th>read_first</th>
   <th>read_last</th>
   <th>read_key</th>
@@ -125,58 +135,11 @@ require_once "models/consultar.models.php";
   <th>created_tmp_tables</th>
   <th>start</th>
   <th>end</th>
-  <th>main_table</th>
   <th>Ações</th>
   </tr>
   </thead>
   <tbody>
-  <?php
-  $logs = ModelsConsultar::ListaLogs();
-
-  foreach ($logs as $log) {
-  if (is_array($log)) {
-  echo '<tr>';
-  echo '<td>' . htmlspecialchars($log["last_insert_id"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["time"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["user_host"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["query_time"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["lock_time"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["rows_sent"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["rows_examined"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["db"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["server_id"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["sql_text"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["thread_id"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["errno"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["killed"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["bytes_received"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["bytes_sent"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_first"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_last"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_key"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_next"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_prev"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_rnd"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["read_rnd_next"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["sort_merge_passes"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["sort_range_count"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["sort_rows"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["sort_scan_count"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["created_tmp_disk_tables"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["created_tmp_tables"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["start"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["end"]) . '</td>';
-  echo '<td>' . htmlspecialchars($log["main_table"]) . '</td>';
-  echo '<td>
-  <div>
-  <button class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i></button>
-  <button class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>
-  </div>
-  </td>';
-  echo '</tr>';
-  }
-  }
-  ?>
+  
   </tbody>
   </table>
   </div>
@@ -184,3 +147,48 @@ require_once "models/consultar.models.php";
   </div>
   </section>
 </div>
+
+<script>
+  $('#btConsultar').on('click', function (event) {
+    event.preventDefault();
+
+    // Coleta as colunas selecionadas
+    let colunasSelecionadas = [];
+    $('#columnFilterForm input[type="checkbox"]:checked').each(function () {
+      colunasSelecionadas.push($(this).data('column'));
+    });
+
+    // Faz o envio via AJAX
+    $.ajax({
+      url: 'controllers/consultar.controller.php',
+      type: 'POST',
+      data: { action: 'listarLogs', colunas: colunasSelecionadas },
+      success: function (response) {
+        if (response.error) {
+          // Exibe a mensagem de erro no modal
+          $("#modal-warning .modal-title").text("Erro");
+          $("#modal-warning .modal-body p").text(response.error);
+          $("#modal-warning").modal('show');
+        } else {
+          // Insere a tabela pronta no container
+          $('#logsTableContainer').html(response.table);
+
+          // Re-inicializa o DataTables
+          $('#logsTable').DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+              url: "//cdn.datatables.net/plug-ins/1.11.5/i18n/Portuguese-Brasil.json" // Altere conforme necessário
+            }
+          });          
+        }
+      },
+      error: function (xhr, status, error) {
+        // Exibe a mensagem de erro no modal
+        $("#modal-warning .modal-title").text("Erro ao consultar");
+        $("#modal-warning .modal-body p").text("Erro ao consultar: " + error);
+        $("#modal-warning").modal('show');
+      }
+    });
+  });
+</script>

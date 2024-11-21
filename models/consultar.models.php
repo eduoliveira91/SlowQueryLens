@@ -3,22 +3,25 @@
 require_once "connection.php";
 
 class ModelsConsultar {
-	
-	static public function MostrarLogs($tabela, $item, $valor) {
-		$stmt = Connection::conectar()->prepare("SELECT * FROM $tabela WHERE $item = :$item");
-		$stmt->bindParam(":".$item, $valor, PDO::PARAM_STR);
-		$stmt->execute();
-		return $stmt->fetch();
-		$stmt->close();
-		$stmt = null;
-	}
+    static public function ConsultarLogs($colunas) {
+        if (empty($colunas)) {
+            return [];
+        }
 
-	static public function ListaLogs() {
-		$stmt = Connection::conectar()->prepare("SELECT * FROM slow_logs WHERE insert_id > 0");
-		$stmt->execute();
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
-		$stmt->close();
-		$stmt = null;
-	}
+        $colunasSQL = implode(',', array_map(function ($coluna) {
+            return "`$coluna`";
+        }, $colunas));
+
+        try {
+            $stmt = Connection::conectar()->prepare("SELECT $colunasSQL FROM slow_logs WHERE insert_id > 0");
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Log de erro para depuração
+            error_log("Erro na consulta SQL: " . $e->getMessage());
+            return ["error" => $e->getMessage()];
+        }
+	}	
 
 }

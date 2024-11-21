@@ -15,19 +15,14 @@
     <div class="box">
       <div class="box-header with-border">
         <h3 class="box-title">Apresentação</h3>
-        <div class="box-tools pull-right">
-          <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
-                  title="Collapse">
-            <i class="fa fa-minus"></i></button>
-          <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
-            <i class="fa fa-times"></i></button>
-        </div>
       </div>
 
       <div class="box-body">
         Este software foi desenvolvido para difusão de conhecimentos a cerca do uso de <i><b>slow_logs</b></i> do MySQL e é apresentado como uma ferramenta capaz de facilitar sua análise, possibilitando melhorias de consultas de qualquer natureza das mais diversas aplicações.
         <br><br>
-        Com o intuito de fomentar a comunidade desenvolvedora e entusiastas de banco de dados, este software é disponibilizado de forma gratuita e de código aberto no <a href="https://github.com/eduoliveira91/SlowQueryLens" target="_blank">Github</a>.
+        Com o intuito de fomentar a comunidade desenvolvedora e entusiastas de banco de dados, este software é disponibilizado de forma gratuita e de código aberto.
+        <br>
+        Repositório disponível no <a href="https://github.com/eduoliveira91/SlowQueryLens" target="_blank">Github</a>.
       </div>
 
 

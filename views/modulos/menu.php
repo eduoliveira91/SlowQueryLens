@@ -1,19 +1,19 @@
 <aside class="main-sidebar">
     <section class="sidebar">
         <ul class="sidebar-menu" data-widget="tree">
-            <li class="<?php echo ($_SERVER['REQUEST_URI'] == '/inicio' || $_SERVER['REQUEST_URI'] == '/SlowQueryLens/inicio') ? 'active' : ''; ?>">
+            <li class="<?php echo (isset($_GET['rota']) && $_GET['rota'] == 'inicio') ? 'active' : ''; ?>">
                 <a href="inicio">
                     <i class="fa fa-home"></i>
                     <span>Inicio</span>
                 </a>
             </li>
-            <li class="<?php echo ($_SERVER['REQUEST_URI'] == '/logs-importar' || $_SERVER['REQUEST_URI'] == '/SlowQueryLens/logs-importar') ? 'active' : ''; ?>">
+            <li class="<?php echo (isset($_GET['rota']) && $_GET['rota'] == 'logs-importar') ? 'active' : ''; ?>">
                 <a href="logs-importar">
                     <i class="fa fa-download"></i>
                     <span>Importar</span>
                 </a>
             </li>
-            <li class="<?php echo ($_SERVER['REQUEST_URI'] == '/logs-consultar' || $_SERVER['REQUEST_URI'] == '/SlowQueryLens/logs-consultar') ? 'active' : ''; ?>">
+            <li class="<?php echo (isset($_GET['rota']) && $_GET['rota'] == 'logs-consultar') ? 'active' : ''; ?>">
                 <a href="logs-consultar">
                     <i class="fa fa-search"></i>
                     <span>Consultar</span>

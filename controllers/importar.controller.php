@@ -87,7 +87,7 @@ class ControllerImportar{
 
                 } elseif (preg_match('/# Thread_id: (\d+)  Schema: (\w+)  QC_hit: \w+/', $linha, $matches)) {
                     $entradaLog['thread_id'] = (int)$matches[1];
-                    $entradaLog['db'] = $matches[2];
+                    $entradaLog['name_schema'] = $matches[2];
 
                 } elseif (preg_match('/# Rows_affected: (\d+)  Bytes_sent: (\d+)/', $linha, $matches)) {
                     $entradaLog['rows_affected'] = (int)$matches[1];
@@ -117,7 +117,7 @@ class ControllerImportar{
                     $entradaLog['start'] = $matches[1];
                 } elseif (preg_match('/End: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/', $linha, $matches)) {
                     $entradaLog['end'] = $matches[1];
-                } elseif (preg_match('/(select .*|set .*|show .*)/i', $linha, $matches)) {
+                } elseif (preg_match('/(SELECT .*|SHOW .*|INSERT .*|UPDATE .*|DELETE .*|CREATE .*|ALTER .*|DROP .*)/i', $linha, $matches)) {
                     $query = $matches[1];
                     
                     // Tratar quebras de linha no comando SQL
@@ -175,8 +175,7 @@ class ControllerImportar{
             'created_tmp_tables' => 0,
             'start' => '',
             'end' => '',
-            'db' => '',
-            'server_id' => 0,
+            'name_schema' => '',
             'thread_id' => 0,
             'rows_affected' => 0,
             'errno' => 0,
