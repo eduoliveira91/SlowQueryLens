@@ -120,13 +120,14 @@ class ControllerImportar{
                 } elseif (preg_match('/(SELECT .*|SHOW .*|INSERT .*|UPDATE .*|DELETE .*|CREATE .*|ALTER .*|DROP .*)/i', $linha, $matches)) {
                     $query = $matches[1];
                     
+                    /*
                     // Tratar quebras de linha no comando SQL
                     while (($linha = fgets($arquivo)) !== false) {
                         $query .= ' ' . trim($linha);
                         if (preg_match('/;$/', $linha)) {
                             break;
                         }
-                    }
+                    }*/
 
                     $entradaLog['query'] = trim($query);
                     $entradaLog['main_table'] = $this->obterTabelaPrincipal($entradaLog['query']);

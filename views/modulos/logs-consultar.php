@@ -1,5 +1,5 @@
 <?php
-require_once "models/consultar.models.php";
+require_once "controllers/consultar.controller.php";
 ?>
 <div class="content-wrapper">
    
@@ -18,15 +18,75 @@ require_once "models/consultar.models.php";
  
   <div class="box">
     <div class="box-header with-border">
-      <h3 class="box-title">Filtrar Colunas</h3>
-    </div>
+      <h3 class="box-title">Filtros</h3>
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+      </div>
+  </div>
     <div class="box-body">
       <form id="columnFilterForm">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="form-group">
-              <label for="columnFilter1">Filtrar Colunas (1-15):</label>
-              <div id="columnFilter1" class="form-control" style="height: 200px; overflow-y: scroll;">
+              <label>Período:</label>
+
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <i class="fa fa-clock-o"></i>
+                </div>
+                <input type="text" class="form-control pull-right" name="periodo" id="periodo">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="sqlCommand"><input type="checkbox" id="useSqlCommand"> Filtro SQL:</label>
+              <textarea disabled id="sqlCommand" class="form-control" rows="6" placeholder="Digite seu comando SQL aqui..."></textarea>
+            </div>
+            <script>
+              document.getElementById('useSqlCommand').addEventListener('change', function() {
+                document.getElementById('sqlCommand').disabled = !this.checked;
+              });
+            </script>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label for="lstMainTable">Main table:</label>
+              <button type="button" id="selMainTable" class="btn btn-primary btn-xs pull-right" data-all-checked="false">Marcar todos</button>
+              <script>
+                document.getElementById('selMainTable').addEventListener('click', function() {
+                  var allChecked = this.dataset.allChecked === 'true';
+                  document.querySelectorAll('#lstMainTable input[type="checkbox"]').forEach(function(checkbox) {
+                  checkbox.checked = !allChecked;
+                  checkbox.dispatchEvent(new Event('change'));
+                  });
+                  this.dataset.allChecked = !allChecked;
+                  this.textContent = allChecked ? 'Marcar todos' : 'Desmarcar todos';
+                });
+              </script>            
+              <div id="lstMainTable" class="form-control" style="height: 280px; overflow-y: scroll;">
+                <?php
+                $controller = new ControllerConsultar();
+                $controller->gerarOpcoesMainTable();
+                ?>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label for="columnFilter1">Colunas padrão:</label>
+              <button type="button" id="selColsPadrao" class="btn btn-primary btn-xs pull-right" data-all-checked="true">Desmarcar todos</button>
+              <script>
+                document.getElementById('selColsPadrao').addEventListener('click', function() {
+                  var allChecked = this.dataset.allChecked === 'true';
+                  document.querySelectorAll('#columnFilter1 input[type="checkbox"]').forEach(function(checkbox) {
+                  checkbox.checked = !allChecked;
+                  checkbox.dispatchEvent(new Event('change'));
+                  });
+                  this.dataset.allChecked = !allChecked;
+                  this.textContent = allChecked ? 'Marcar todos' : 'Desmarcar todos';
+                });
+              </script>
+              <div id="columnFilter1" class="form-control" style="height: 120px; overflow-y: scroll;">
+                <label><input type="checkbox" class="column-toggle" data-column="insert_id" checked> insert_id</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="time" checked> time</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="user_host" checked> user_host</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="thread_id" checked> thread_id</label><br>
@@ -41,11 +101,22 @@ require_once "models/consultar.models.php";
                 <label><input type="checkbox" class="column-toggle" data-column="main_table" checked> main_table</label><br>
               </div>
             </div>
-          </div>
-          <div class="col-md-6">
+
             <div class="form-group">
-              <label for="columnFilter2">Filtrar Colunas (16-30):</label>
-              <div id="columnFilter2" class="form-control" style="height: 200px; overflow-y: scroll;">
+              <label for="columnFilter2">Colunas extra:</label>
+              <button type="button" id="selColsExtra" class="btn btn-primary btn-xs pull-right" data-all-checked="true">Desmarcar todos</button>
+              <script>
+                document.getElementById('selColsExtra').addEventListener('click', function() {
+                  var allChecked = this.dataset.allChecked === 'true';
+                  document.querySelectorAll('#columnFilter2 input[type="checkbox"]').forEach(function(checkbox) {
+                  checkbox.checked = !allChecked;
+                  checkbox.dispatchEvent(new Event('change'));
+                  });
+                  this.dataset.allChecked = !allChecked;
+                  this.textContent = allChecked ? 'Marcar todos' : 'Desmarcar todos';
+                });
+              </script>              
+              <div id="columnFilter2" class="form-control" style="height: 120px; overflow-y: scroll;">
                 <label><input type="checkbox" class="column-toggle" data-column="errno" checked> errno</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="killed" checked> killed</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="bytes_received" checked> bytes_received</label><br>
@@ -65,7 +136,10 @@ require_once "models/consultar.models.php";
                 <label><input type="checkbox" class="column-toggle" data-column="start" checked> start</label><br>
                 <label><input type="checkbox" class="column-toggle" data-column="end" checked> end</label><br>
               </div>
-            </div>
+            </div>            
+          </div>
+          <div class="col-md-2">
+
           </div>
         </div>
         <div class="box-footer">
@@ -74,6 +148,82 @@ require_once "models/consultar.models.php";
       </form>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-6">
+      <!-- Existing column filter form -->
+    </div>
+  </div>
+
+  <script>
+    $('#btFiltrar').on('click', function (event) {
+      event.preventDefault();
+
+      // Colunas selecionadas
+      let colunasSelecionadas = [];
+      $('#columnFilterForm input[type="checkbox"]:checked').each(function () {
+        colunasSelecionadas.push($(this).data('column'));
+      });
+
+      // Filtros de data e SQL
+      let startDate = $('#startDate').val();
+      let endDate = $('#endDate').val();
+      let sqlCommand = $('#sqlCommand').val();
+      let useSqlCommand = $('#useSqlCommand').is(':checked');
+
+      // Faz o envio via AJAX
+      $.ajax({
+        url: 'controllers/consultar.controller.php',
+        type: 'POST',
+        data: { 
+          action: 'listarLogs', 
+          colunas: colunasSelecionadas,
+          startDate: startDate,
+          endDate: endDate,
+          sqlCommand: useSqlCommand ? sqlCommand : null
+        },
+        success: function (response) {
+          if (response.error) {
+            $("#modal-warning .modal-title").text("Erro");
+            $("#modal-warning .modal-body p").text(response.error);
+            $("#modal-warning").modal('show');
+          } else {
+            $('#logsTableContainer').html(response.table);
+
+            // Re-inicializa o DataTable
+            $('#logsTable').DataTable({
+              responsive: true,
+              autoWidth: false,
+              language: {
+                sProcessing: "Processando...",
+                sLengthMenu: "Mostrar _MENU_ registros",
+                sZeroRecords: "Nenhum resultado encontrado",
+                sEmptyTable: "Não há dados disponíveis nesta tabela",
+                sInfo: "Mostrando registros de _START_ a _END_ de um total de _TOTAL_",
+                sInfoEmpty: "Mostrando registros de 0 a 0 de um total de 0",
+                sInfoFiltered: "(filtrando um total de registros _MAX_)",
+                sSearch: "Pesquisar:",
+                oPaginate: {
+                  sFirst: "Primeiro",
+                  sLast: "Último",
+                  sNext: "Próximo",
+                  sPrevious: "Anterior"
+                },
+                oAria: {
+                  sSortAscending: ": Ativar para ordenar a coluna crescente",
+                  sSortDescending: ": Ativar para ordenar a coluna decrescente"
+                }
+              }            
+            });          
+          }
+        },
+        error: function (xhr, status, error) {
+          $("#modal-warning .modal-title").text("Erro ao consultar");
+          $("#modal-warning .modal-body p").text("Erro ao consultar: " + error);
+          $("#modal-warning").modal('show');
+        }
+      });
+    });
+  </script>
 
   <script>
   document.querySelectorAll('.column-toggle').forEach(function(checkbox) {
@@ -104,7 +254,7 @@ require_once "models/consultar.models.php";
   <table class="table table-bordered table-striped dt-responsive tables" width="100%">
   <thead>
   <tr>
-  <th style="width:10px">ID</th>
+  <th style="width:10px">insert_id</th>
   <th>time</th>
   <th>user_host</th>
   <th>thread_id</th>
@@ -135,7 +285,6 @@ require_once "models/consultar.models.php";
   <th>created_tmp_tables</th>
   <th>start</th>
   <th>end</th>
-  <th>Ações</th>
   </tr>
   </thead>
   <tbody>
@@ -149,10 +298,25 @@ require_once "models/consultar.models.php";
 </div>
 
 <script>
+  // ao carregar todo o html chama o clic do botão selColsExtra para escolher as colunas extras
+  $(document).ready(function(){
+    $('#selColsExtra').click();
+  });
+
+  $('#periodo').daterangepicker({
+     startDate: '01/01/1901', endDate: '31/12/2199', 
+     timePicker: true, timePickerSeconds: true, timePicker24Hour: true,
+     timePickerIncrement: 30, 
+     locale: {
+        format: 'DD/MM/YYYY hh:mm A' 
+      }
+    }
+  );
+
   $('#btConsultar').on('click', function (event) {
     event.preventDefault();
 
-    // Coleta as colunas selecionadas
+    // Colunas selecionadas
     let colunasSelecionadas = [];
     $('#columnFilterForm input[type="checkbox"]:checked').each(function () {
       colunasSelecionadas.push($(this).data('column'));
@@ -165,15 +329,13 @@ require_once "models/consultar.models.php";
       data: { action: 'listarLogs', colunas: colunasSelecionadas },
       success: function (response) {
         if (response.error) {
-          // Exibe a mensagem de erro no modal
           $("#modal-warning .modal-title").text("Erro");
           $("#modal-warning .modal-body p").text(response.error);
           $("#modal-warning").modal('show');
         } else {
-          // Insere a tabela pronta no container
           $('#logsTableContainer').html(response.table);
 
-          // Re-inicializa o DataTables
+          // Re-inicializa o DataTable
           $('#logsTable').DataTable({
             responsive: true,
             autoWidth: false,
@@ -201,7 +363,6 @@ require_once "models/consultar.models.php";
         }
       },
       error: function (xhr, status, error) {
-        // Exibe a mensagem de erro no modal
         $("#modal-warning .modal-title").text("Erro ao consultar");
         $("#modal-warning .modal-body p").text("Erro ao consultar: " + error);
         $("#modal-warning").modal('show');
