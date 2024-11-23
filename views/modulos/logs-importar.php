@@ -35,10 +35,22 @@ require_once "controllers/importar.controller.php";
                 </div>
                 <div class="form-group">
                   <label>Operações</label>
-                  <div class="scrollable-checkboxes border p-1">
+                  <div id="listaOperacoesImp" class="scrollable-checkboxes border p-1">
+                    <button type="button" id="selOperacaoes" class="btn btn-primary btn-xs" data-all-checked="false">Marcar todos</button>
+                    <script>
+                      document.getElementById('selOperacaoes').addEventListener('click', function() {
+                        var allChecked = this.dataset.allChecked === 'true';
+                        document.querySelectorAll('#listaOperacoesImp input[type="checkbox"]').forEach(function(checkbox) {
+                        checkbox.checked = !allChecked;
+                        checkbox.dispatchEvent(new Event('change'));
+                        });
+                        this.dataset.allChecked = !allChecked;
+                        this.textContent = allChecked ? 'Marcar todos' : 'Desmarcar todos';
+                      });
+                    </script>                     
                   <?php
-                  $controller = new ControllerImportar();
-                  $controller->gerarOpcoesFormulario();
+                    $controller = new ControllerImportar();
+                    $controller->gerarOpcoesFormulario();
                   ?>
                   </div>
                 </div>
@@ -94,14 +106,17 @@ require_once "controllers/importar.controller.php";
       processData: false,
       success: function(response) {
         if (response.error) {
-          $('#logList').val(response.error);
+          $('#modal-warning .modal-title').text('Erro ao validar dados');
+          $('#modal-warning .modal-body').text(response.error);
+          $('#modal-warning').modal('show');
         } else {
           $('#logList').val("JSON com dados importados:\n" + JSON.stringify(response.data, null, 2)); // Formata JSON com indentação
         }
       },
       error: function(xhr, status, error) {
-        $('#logList').val("Erro ao importar: " + error);
-        
+        $('#modal-warning .modal-title').text('Erro');
+        $('#modal-warning .modal-body').text('Erro ao importar logs: ' + error);
+        $('#modal-warning').modal('show');
       }
     });
   });

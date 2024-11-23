@@ -15,25 +15,8 @@ class ControllerImportar{
     ];
 
     public function gerarOpcoesFormulario() {
-        echo '<script>
-                function toggleCheckboxes(source) {
-                checkboxes = document.querySelectorAll(".form-check-input");
-                for (var i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i] != source) {
-                checkboxes[i].checked = source.checked;
-                }
-                }
-                }
-            </script>';
-          
-        echo '<div class="form-check">';
-        echo '<label class="form-check-label" for="checkAll">';
-        echo '<input class="form-check-input" type="checkbox" id="checkAll" onclick="toggleCheckboxes(this)"> Marcar todos';
-        echo '</label>';
-        echo '</div>';
-
         foreach ($this->operacoesPossiveis as $operacao) {
-            echo '<div class="form-check">';
+            echo '<div class="checkbox">';
             echo '<label class="form-check-label" for="' . strtolower($operacao) . 'Check">';
             echo '<input class="form-check-input" type="checkbox" name="' . strtolower($operacao) . 'Check" id="' . strtolower($operacao) . 'Check"> ' . $operacao;
             echo '</label>';
