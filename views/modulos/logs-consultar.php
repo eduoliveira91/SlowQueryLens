@@ -155,7 +155,7 @@ require_once "controllers/consultar.controller.php";
   </div>
   <div class="box">
   <div class="box-header with-border" id="logsTableContainer">
-  <table class="table table-bordered table-striped dt-responsive tables" width="100%">
+  <table id="logsTable" class="table table-bordered table-striped dt-responsive tables" width="100%">
   <thead>
   <tr>
   <th style="width:10px">insert_id</th>
@@ -231,11 +231,11 @@ require_once "controllers/consultar.controller.php";
   });
 
   $('#periodo').daterangepicker({
-     startDate: '01/01/1901', endDate: '31/12/2199', 
+     startDate: '01/01/1901 00:00:01', endDate: '31/12/2199 23:59:59', 
      timePicker: true, timePickerSeconds: true, timePicker24Hour: true,
      timePickerIncrement: 30, 
      locale: {
-        format: 'DD/MM/YYYY hh:mm A' 
+        format: 'DD/MM/YYYY hh:mm:ss' 
       }
     }
   );
@@ -243,106 +243,137 @@ require_once "controllers/consultar.controller.php";
   $('#btConsultar').on('click', function (event) {
     event.preventDefault();
 
-    // Validação
-    let periodo = $('#periodo').val().split(' - ');
-    let datahoraInicio = periodo[0].split(' ');
-    let datahoraFim = periodo[1].split(' ');
-    // testar o formato da data e hora 01/01/1901 05:00 AM - 31/12/2199 01:00 AM
-    if (datahoraInicio.length !== 3 || datahoraFim.length !== 3) {
-      $("#modal-warning .modal-title").text("Erro");
-      $("#modal-warning .modal-body p").text("Formato de data e hora inválido.");
-      $("#modal-warning").modal('show');
-      return;
-    }
-     
-
-    // ver se a data inicial é menor que a final
-    if (new Date(datahoraInicio[0]) > new Date(datahoraFim[0])) {
-      $("#modal-warning .modal-title").text("Erro");
-      $("#modal-warning .modal-body p").text("Data inicial maior que a final.");
-      $("#modal-warning").modal('show');
-      return;
+    // Obtém o período selecionado
+    let periodo = $('#periodo').val();
+    if (!periodo) {
+        alert('Período não pode ser vazio.');
+        return;
     }
 
-    // alertar o período selecionado
-    //alert('Período selecionado: ' + JSON.stringify(periodo));
-    if ($('#usaFiltroSQL').is(':checked') && $('#filtroSQL').val().trim() === '') {
-      $("#modal-warning .modal-title").text("Erro");
-      $("#modal-warning .modal-body p").text("Filtro SQL habilitado, mas não preenchido.");
-      $("#modal-warning").modal('show');
-      return;
-    }    
+    // Divide o valor do período
+    let periodoArray = periodo.split(' - ');
+    if (periodoArray.length !== 2) {
+        alert('Formato de período inválido. Use o formato: DD/MM/YYYY HH:mm:ss - DD/MM/YYYY HH:mm:ss.');
+        return;
+    }
 
-    // Colunas selecionadas
+    let datahoraInicio = periodoArray[0].trim();
+    let datahoraFim = periodoArray[1].trim();
+
+    // Valida o formato das datas
+    var dateTimeRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
+    if (!dateTimeRegex.test(datahoraInicio) || !dateTimeRegex.test(datahoraFim)) {
+        alert('Formato de data e hora inválido. Use o formato: DD/MM/YYYY HH:mm:ss.');
+        return;
+    }
+
+    // Valida se a data inicial é menor que a final
+    if (new Date(datahoraInicio.split('/').reverse().join('-')) > new Date(datahoraFim.split('/').reverse().join('-'))) {
+        alert('A data inicial não pode ser maior que a final.');
+        return;
+    }
+
+    // Coleta as colunas selecionadas selColunas e selColsExtra
     let colunasSelecionadas = [];
     $('#selColunas input[type="checkbox"]:checked').each(function () {
-      colunasSelecionadas.push($(this).data('column'));
+        colunasSelecionadas.push($(this).data('column'));
+    });
+    $('#selColsExtra input[type="checkbox"]:checked').each(function () {
+        colunasSelecionadas.push($(this).data('column'));
     });
 
     if (colunasSelecionadas.length === 0) {
-      $("#modal-warning .modal-title").text("Erro");
-      $("#modal-warning .modal-body p").text("Nenhuma coluna foi selecionada.");
-      $("#modal-warning").modal('show');
-      return;
-    }    
-
-    if ($('#usaFiltroSQL').is(':checked')) {
-      var filtroSQL = $('#filtroSQL').val().trim();
-    } else {
-      var filtroSQL = '';
-    }
-    
-    // Filtro main_table
-    let mainTable = [];
-    $('#filtroMainTable input[type="checkbox"]:checked').each(function () {
-      mainTable.push($(this).data('column'));
-    });
-
-    // Faz o envio via AJAX
-    $.ajax({
-      url: 'controllers/consultar.controller.php',
-      type: 'POST',
-      data: { action: 'listarLogs', datahoraInicio: datahoraInicio, datahoraFim: datahoraFim, filtroSQL: filtroSQL, filtroMainTable: mainTable, colunas: colunasSelecionadas},
-      success: function (response) {
-        if (response.error) {
-          $("#modal-warning .modal-title").text("Erro");
-          $("#modal-warning .modal-body p").text(response.error);
-          $("#modal-warning").modal('show');
-        } else {
-          $('#logsTableContainer').html(response.table);
-
-          // Re-inicializa o DataTable
-          $('#logsTable').DataTable({
-            responsive: true,
-            autoWidth: false,
-            language: {
-              sProcessing: "Processando...",
-              sLengthMenu: "Mostrar _MENU_ registros",
-              sZeroRecords: "Nenhum resultado encontrado",
-              sEmptyTable: "Não há dados disponíveis nesta tabela",
-              sInfo: "Mostrando registros de _START_ a _END_ de um total de _TOTAL_",
-              sInfoEmpty: "Mostrando registros de 0 a 0 de um total de 0",
-              sInfoFiltered: "(filtrando um total de registros _MAX_)",
-              sSearch: "Pesquisar:",
-              oPaginate: {
-                sFirst: "Primeiro",
-                sLast: "Último",
-                sNext: "Próximo",
-                sPrevious: "Anterior"
-              },
-              oAria: {
-                sSortAscending: ": Ativar para ordenar a coluna crescente",
-                sSortDescending: ": Ativar para ordenar a coluna decrescente"
-              }
-            }            
-          });          
-        }
-      },
-      error: function (xhr, status, error) {
-        $("#modal-warning .modal-title").text("Erro ao consultar");
-        $("#modal-warning .modal-body p").text("Erro ao consultar: " + error);
+        $("#modal-warning .modal-title").text("Erro");
+        $("#modal-warning .modal-body p").text("Nenhuma coluna foi selecionada.");
         $("#modal-warning").modal('show');
-      }
+        return;
+    }
+
+    // Coleta o filtro SQL (se habilitado)
+    let filtroSQL = '';
+    if ($('#usaFiltroSQL').is(':checked')) {
+        filtroSQL = $('#filtroSQL').val().trim();
+        if (!filtroSQL) {
+            $("#modal-warning .modal-title").text("Erro");
+            $("#modal-warning .modal-body p").text("Filtro SQL está habilitado, mas não foi preenchido.");
+            $("#modal-warning").modal('show');
+            return;
+        }
+    }
+
+    // Coleta os valores de main_table selecionados
+    let mainTableSelecionadas = [];
+    $('#filtroMainTable input[type="checkbox"]:checked').each(function () {
+        mainTableSelecionadas.push($(this).val());
     });
-  });
+
+    // limpar a tabela antes de consultar
+    $('#logsTable tbody').empty();
+    $('#logsTable tbody').append('<tr class="odd"><td valign="top" colspan="31" class="dataTables_empty">Não há dados disponíveis nesta tabela</td></tr>');
+    $('#logsTable_info').text('Mostrando registros de 0 a 0 de um total de 0');
+    $('#logsTable_paginate').hide();
+
+    // Envia a consulta via AJAX
+    $.ajax({
+        url: 'controllers/consultar.controller.php',
+        type: 'POST',
+        data: {
+            action: 'listarLogs',
+            datahoraInicio: datahoraInicio,
+            datahoraFim: datahoraFim,
+            filtroSQL: filtroSQL,
+            filtroMainTable: mainTableSelecionadas,
+            colunas: colunasSelecionadas
+        },
+        success: function (response) {
+            if (response.error) {
+              $('#logsTableContainer').html(response.table);
+              $("#modal-warning .modal-title").text("Erro");
+              $("#modal-warning .modal-body p").text(response.error);
+              $("#modal-warning").modal('show');
+            } else {
+                // Atualiza a tabela com os dados recebidos
+                $('#logsTableContainer').html(response.table);
+
+                // Re-inicializa o DataTable
+                $('#logsTable').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    language: {
+                        sProcessing: "Processando...",
+                        sLengthMenu: "Mostrar _MENU_ registros",
+                        sZeroRecords: "Nenhum resultado encontrado",
+                        sEmptyTable: "Não há dados disponíveis nesta tabela",
+                        sInfo: "Mostrando registros de _START_ a _END_ de um total de _TOTAL_",
+                        sInfoEmpty: "Mostrando registros de 0 a 0 de um total de 0",
+                        sInfoFiltered: "(filtrando um total de registros _MAX_)",
+                        sSearch: "Pesquisar:",
+                        oPaginate: {
+                            sFirst: "Primeiro",
+                            sLast: "Último",
+                            sNext: "Próximo",
+                            sPrevious: "Anterior"
+                        },
+                        oAria: {
+                            sSortAscending: ": Ativar para ordenar a coluna crescente",
+                            sSortDescending: ": Ativar para ordenar a coluna decrescente"
+                        }
+                    }
+                });
+            }
+
+            if (response.sql) {
+                $("#modal-warning .modal-title").text("Consulta SQL");
+                $("#modal-warning .modal-body p").text(response.sql);
+                $("#modal-warning").modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            $("#modal-warning .modal-title").text("Erro ao consultar");
+            $("#modal-warning .modal-body p").text(error);
+            $("#modal-warning").modal('show');
+        }
+    });
+});
+
 </script>

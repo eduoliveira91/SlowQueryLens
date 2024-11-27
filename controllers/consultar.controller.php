@@ -28,61 +28,88 @@ class ControllerConsultar {
     }
 
     public function validaPeriodo($datahoraInicio, $datahoraFim) {
-        $datahoraInicio = DateTime::createFromFormat('Y-m-d H:i:s', $datahoraInicio);
-        $datahoraFim = DateTime::createFromFormat('Y-m-d H:i:s', $datahoraFim);
-
-        return true;
+        $datahoraInicio = DateTime::createFromFormat('Y-m-d H:i:s.u', $datahoraInicio);
+        $datahoraFim = DateTime::createFromFormat('Y-m-d H:i:s.u', $datahoraFim);
+    
+        if ($datahoraInicio && $datahoraFim) {
+            return $datahoraInicio <= $datahoraFim;
+        }
+    
+        return false;
     }
 
     public function processarConsulta() {
         $resultado = [];
-
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'listarLogs') {
             $colunas = $_POST['colunas'] ?? [];
-            $datahoraInicio = '1901-01-01 23:59:59';
-            $datahoraFim = '2199-01-01 23:59:59';
-            $filtroSQL = $_POST['filtroSQL'] ?? [];
-            $filtroMainTable = $_POST['filtroMainTable'] ?? '';
-
+            $datahoraInicio = DateTime::createFromFormat('d/m/Y H:i:s', $_POST['datahoraInicio']);
+            $datahoraFim = DateTime::createFromFormat('d/m/Y H:i:s', $_POST['datahoraFim']);
+            $filtroSQL = $_POST['filtroSQL'] ?? '';
+            $filtroMainTable = $_POST['filtroMainTable'] ?? [];
+    
+            // Verificar se as datas foram criadas corretamente
+            if (!$datahoraInicio || !$datahoraFim) {
+                $resultado['error'] = 'Formato de data/hora inválido.';
+                echo json_encode($resultado);
+                exit;
+            }
+    
+            // Converter as datas para o formato esperado
+            $datahoraInicio = $datahoraInicio->format('Y-m-d H:i:s') . '.000000';
+            $datahoraFim = $datahoraFim->format('Y-m-d H:i:s') . '.999999';
+    
+            // Validar o período
+            if (!$this->validaPeriodo($datahoraInicio, $datahoraFim)) {
+                $resultado['error'] = 'O período informado é inválido.';
+                echo json_encode($resultado);
+                exit;
+            }
+    
+            // Validar colunas selecionadas
             if (empty($colunas)) {
                 $resultado['error'] = 'Nenhuma coluna foi selecionada.';
-            } else {
-                if (!validaPeriodo($periodo)) {
-                    $resultado['error'] = 'Período inválido.';
+                echo json_encode($resultado);
+                exit;
+            }
+    
+            // Consultar os logs no model
+            $dados = ModelsConsultar::ConsultarLogs($colunas, $datahoraInicio, $datahoraFim, $filtroSQL, $filtroMainTable);
+    
+            if (!empty($dados['dados'])) {
+                // Montar tabela
+                $tabela = '<table id="logsTable" class="table table-bordered table-striped dt-responsive tables" width="100%">';
+                $tabela .= '<thead><tr>';
+                foreach ($colunas as $coluna) {
+                    $tabela .= '<th>' . htmlspecialchars($coluna) . '</th>';
                 }
-                else {
-                    $dados = ModelsConsultar::ConsultarLogs($colunas, $datahoraInicio, $datahoraFim, $filtroSQL, $filtroMainTable);
-
-                    if (isset($dados['error'])) {
-                        $resultado['error'] = $dados['error'];
-                    } elseif (!empty($dados)) {
-                        $tabela = '<table id="logsTable" class="table table-bordered table-striped dt-responsive tables" width="100%">';
-                        $tabela .= '<thead><tr>';
-                        foreach ($colunas as $coluna) {
-                            $tabela .= '<th>' . htmlspecialchars($coluna) . '</th>';
-                        }
-                        $tabela .= '</tr></thead><tbody>';
-                        foreach ($dados as $linha) {
-                            $tabela .= '<tr>';
-                            foreach ($colunas as $coluna) {
-                                $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
-                            }
-                            $tabela .= '</tr>';
-                        }
-                        $tabela .= '</tbody></table>';
-
-                        $resultado['table'] = $tabela;
-                    } else {
-                        $resultado['error'] = 'Nenhum dado encontrado na tabela.';
+                $tabela .= '</tr></thead><tbody>';
+                foreach ($dados['dados'] as $linha) {
+                    $tabela .= '<tr>';
+                    foreach ($colunas as $coluna) {
+                        $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
                     }
+                    $tabela .= '</tr>';
                 }
+                $tabela .= '</tbody></table>';
+    
+                $resultado['table'] = $tabela;
+
+                if (isset($dados['sql'])) {
+                    $resultado['sql'] = $dados['sql'];
+                }
+        
+            } else {
+                $resultado['error'] = 'Nenhum dado encontrado para os filtros aplicados.';
             }
         } else {
             $resultado['error'] = 'Método de requisição inválido.';
         }
 
+   
         header('Content-Type: application/json');
         echo json_encode($resultado);
+
     }
 }
 
