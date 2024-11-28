@@ -87,7 +87,21 @@ class ControllerConsultar {
                 foreach ($dados['dados'] as $linha) {
                     $tabela .= '<tr>';
                     foreach ($colunas as $coluna) {
-                        $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
+                        if (in_array($coluna, ['time', 'start', 'end'])) {
+                            $dataHora = DateTime::createFromFormat('Y-m-d H:i:s.u', $linha[$coluna]);
+                            if ($dataHora) {
+                                $formattedDate = $dataHora->format('d/m/Y H:i:s');
+                                $microseconds = $dataHora->format('u');
+                                if ($microseconds != '000000') {
+                                    $formattedDate .= '.' . $microseconds;
+                                }
+                                $tabela .= '<td>' . $formattedDate . '</td>';
+                            } else {
+                                $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
+                            }
+                        } else {
+                            $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
+                        }
                     }
                     $tabela .= '</tr>';
                 }
@@ -95,13 +109,22 @@ class ControllerConsultar {
     
                 $resultado['table'] = $tabela;
 
+            } else {
+                if (isset($dados['error'])) {
+                    $resultado['error'] = $dados['error'];
+                } else {
+                    $resultado['error'] = 'Nenhum registro encontrado para os filtros aplicados.';
+                }
+
                 if (isset($dados['sql'])) {
                     $resultado['sql'] = $dados['sql'];
                 }
-        
-            } else {
-                $resultado['error'] = 'Nenhum dado encontrado para os filtros aplicados.';
             }
+
+            if (isset($dados['sql'])) {
+                $resultado['sql'] = $dados['sql'];
+            }
+
         } else {
             $resultado['error'] = 'Método de requisição inválido.';
         }

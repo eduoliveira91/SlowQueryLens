@@ -38,16 +38,27 @@ require_once "controllers/consultar.controller.php";
             </div>
             <div class="form-group">
               <div class="checkbox"><label for="sqlCommand"><input type="checkbox" id="usaFiltroSQL"><b>Filtro SQL:</b></label></div>
-              <textarea disabled name="filtroSQL" id="filtroSQL" class="form-control" rows="6" placeholder="Exemplo: WHERE sql_text LIKE 'SELECT%'..." style="resize: none;"></textarea>
+              <textarea disabled name="filtroSQL" id="filtroSQL" class="form-control" rows="6" placeholder="Exemplo: sql_text LIKE 'SELECT%'..." style="resize: none;"></textarea>
             </div>
             <script>
               document.getElementById('usaFiltroSQL').addEventListener('change', function() {
                 document.getElementById('filtroSQL').disabled = !this.checked;
+                
+                // desabilita filtr periodo e main table
+                document.getElementById('filtroMainTable').style.backgroundColor = this.checked ? '#f0f0f0' : '';
+                document.getElementById('filtroMainTable').querySelectorAll('input').forEach(function(input) {
+                  input.disabled = !document.getElementById('filtroSQL').disabled;
+                });
+                document.getElementById('selMainTable').disabled = this.checked;
+
+                document.getElementById('periodo').disabled = this.checked;
+                document.getElementById('periodo').style.backgroundColor = this.checked ? '#f0f0f0' : '';
+                
               });
             </script>
           </div>
           <div class="col-md-2">
-            <div class="form-group">
+            <div class="form-group" id="blocoMainTable">
               <label for="lstMainTable">Main table:</label>
               <button type="button" id="selMainTable" class="btn btn-primary btn-xs pull-right" data-all-checked="false">Marcar todos</button>
           
@@ -331,6 +342,7 @@ require_once "controllers/consultar.controller.php";
               $("#modal-warning .modal-title").text("Erro");
               $("#modal-warning .modal-body p").text(response.error);
               $("#modal-warning").modal('show');
+
             } else {
                 // Atualiza a tabela com os dados recebidos
                 $('#logsTableContainer').html(response.table);
@@ -361,12 +373,14 @@ require_once "controllers/consultar.controller.php";
                     }
                 });
             }
-
+            /*
             if (response.sql) {
-                $("#modal-warning .modal-title").text("Consulta SQL");
-                $("#modal-warning .modal-body p").text(response.sql);
-                $("#modal-warning").modal('show');
-            }
+                if (response.sql) {
+                    $("#modal-warning .modal-title").text("Consulta SQL");
+                    $("#modal-warning .modal-body p").text(response.sql);
+                    $("#modal-warning").modal('show');
+                }
+            }*/
         },
         error: function (xhr, status, error) {
             $("#modal-warning .modal-title").text("Erro ao consultar");

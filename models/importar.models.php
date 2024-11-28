@@ -35,8 +35,8 @@ class ModelsImportar {
 			sort_scan_count INT DEFAULT 0,
 			created_tmp_disk_tables INT DEFAULT 0,
 			created_tmp_tables INT DEFAULT 0,
-			start TIMESTAMP,
-			end TIMESTAMP,
+			start TIMESTAMP(6),
+			end TIMESTAMP(6),
 			main_table VARCHAR(100)
 		)";
 		$pdo->exec($sql);
@@ -80,14 +80,14 @@ class ModelsImportar {
 			$stmt->execute([
 				':time' => isset($reg['time']) 
 					? (
-						($date = DateTime::createFromFormat('ymd H:i:s', $reg['time']) ?: DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['time'])) 
-						? $date->format('Y-m-d H:i:s') 
-						: '1970-01-01 00:00:01'
+						($date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['time']) ?: DateTime::createFromFormat('Y-m-d H:i:s', $reg['time']) ?: DateTime::createFromFormat('ymd H:i:s', $reg['time'])) 
+						? $date->format('Y-m-d H:i:s.u') 
+						: '1970-01-01 00:00:01.000000'
 					) 
-					: '1970-01-01 00:00:01',
+					: '1970-01-01 00:00:01.000000',
 				':user_host' => isset($reg['user']) && isset($reg['host']) ? $reg['user'] . '@' . $reg['host'] : null,
-				':query_time' => isset($reg['query_time']) ? gmdate('H:i:s', (int)($reg['query_time'] * 3600)) . sprintf(".%06d", (int)(($reg['query_time'] * 1000000) % 1000000)) : null,
-				':lock_time' => isset($reg['lock_time']) ? gmdate('H:i:s', (int)($reg['lock_time'] * 3600)) . sprintf(".%06d", (int)(($reg['lock_time'] * 1000000) % 1000000)) : null,
+				':query_time' => isset($reg['query_time']) ? $reg['query_time'] : null,
+				':lock_time' => isset($reg['lock_time']) ? $reg['lock_time'] : null,
 				':rows_sent' => $reg['rows_sent'] ?? null,
 				':rows_affected' => $reg['rows_affected'] ?? 0,
 				':rows_examined' => $reg['rows_examined'] ?? null,
@@ -113,12 +113,12 @@ class ModelsImportar {
 				':created_tmp_tables' => $reg['created_tmp_tables'] ?? 0,
 				':start' => isset($reg['start']) ? (
 					($startDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['start'])) 
-					? $startDate->format('Y-m-d H:i:s') 
+					? $startDate->format('Y-m-d H:i:s.u') 
 					: null
 				) : null,
 				':end' => isset($reg['end']) ? (
 					($endDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['end'])) 
-					? $endDate->format('Y-m-d H:i:s') 
+					? $endDate->format('Y-m-d H:i:s.u') 
 					: null
 				) : null,
 				':main_table' => $reg['main_table'] ?? null
