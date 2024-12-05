@@ -73,10 +73,10 @@
   <script src="views/bower_components/morris.js/morris.min.js"></script>
   <!-- ChartJS http://www.chartjs.org/-->
   <script src="views/bower_components/Chart.js/Chart.js"></script>
-
 </head>
 
-<body class="hold-trasition skin-blue sidebar-collapse sidebar-mini login-page">
+<body class="hold-trasition skin-blue sidebar-mini login-page">
+  <!-- sidebar-collapse fica recolhido, padrão aberto -->
 
 <div id="ajaxLoadingModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -106,8 +106,8 @@
           <span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Warning Modal</h4>
       </div>
-      <div class="modal-body">
-        <p>One fine body&hellip;</p>
+      <div class="modal-body" style="word-wrap: break-word !important;">
+        <p> </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
@@ -140,7 +140,7 @@
 if (true) {
 
   /*Site wrapper */
-  echo '<div class="wrapper">';
+  //echo '<div class="wrapper">';
 
   /*====================================================
   Cabeçario
@@ -176,7 +176,7 @@ if (true) {
   ====================================================*/
   include "modulos/footer.php";
 
-  echo '</div>';
+ // echo '</div>';
 
 }else{
   //include "modulos/login.php";

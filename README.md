@@ -6,3 +6,7 @@ Este software foi desenvolvido para difusão de conhecimentos a cerca do uso de 
 
 Com o intuito de fomentar a comunidade desenvolvedora e entusiastas de banco de dados, este software é disponibilizado de forma gratuita e de código aberto.
 
+
+
+# Configuração básica
+Configure a acesso ao database a partir do arquivo connection.php.

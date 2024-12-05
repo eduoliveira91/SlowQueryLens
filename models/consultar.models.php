@@ -2,8 +2,10 @@
 
 require_once "connection.php";
 
-class ModelsConsultar {
-    static public function RetornaOpcoesMainTable() {
+class ModelsConsultar
+{
+    static public function RetornaOpcoesMainTable()
+    {
         try {
             $stmt = Connection::conectar()->prepare("SELECT DISTINCT main_table FROM slow_logs WHERE insert_id > 0 and main_table IS NOT NULL and main_table <> ''");
             $stmt->execute();
@@ -15,7 +17,21 @@ class ModelsConsultar {
         }
     }
 
-    static public function ConsultarLogs($colunas, $datahoraInicio, $datahoraFim, $filtroSQL, $filtroMainTable) {
+    public static function RetornaIndices()
+    {
+        try {
+            $stmt = Connection::conectar()->prepare("
+                SHOW INDEX FROM slow_logs
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    static public function consultarLogs($colunas, $dataHoraInicio, $dataHoraFim, $filtroSQL, $filtroTabelaPrincipal)
+    {
         if (empty($colunas)) {
             return [];
         }
@@ -24,73 +40,70 @@ class ModelsConsultar {
             return "`$coluna`";
         }, $colunas));
     
-        // Montagem do WHERE
-        $where = [];
-        $params = []; // Parâmetros da consulta
+        $condicoes = [];
+        $parametros = [];
     
         if (!empty($filtroSQL)) {
-            $where[] = $filtroSQL;
+            $condicoes[] = $filtroSQL;
         } else {
-            if (!empty($datahoraInicio) && !empty($datahoraFim)) {
-                $where[] = " (time BETWEEN :inicio AND :fim) ";
-                $params[':inicio'] = $datahoraInicio;
-                $params[':fim'] = $datahoraFim;
+            if (!empty($dataHoraInicio) && !empty($dataHoraFim)) {
+                $condicoes[] = " (time BETWEEN :inicio AND :fim) ";
+                $parametros[':inicio'] = $dataHoraInicio;
+                $parametros[':fim'] = $dataHoraFim;
             }
     
-            if (!empty($filtroMainTable)) {
-                // Verifica se o item 'sem_informacao' está presente
-                $includeNullAndEmpty = in_array('sem_informacao', $filtroMainTable, true);
+            if (!empty($filtroTabelaPrincipal)) {
+                $incluirNuloVazio = in_array('sem_informacao', $filtroTabelaPrincipal, true);
     
-                // Limpa os valores de filtroMainTable
-                $filtroMainTable = array_map(function($item) {
+                $filtroTabelaPrincipal = array_map(function ($item) {
                     return $item === 'sem_informacao' ? '' : $item;
-                }, $filtroMainTable);
+                }, $filtroTabelaPrincipal);
     
-                // Cria placeholders para os valores
-                $placeholders = [];
-                foreach ($filtroMainTable as $index => $value) {
-                    if ($value !== '') { // Evita adicionar string vazia duas vezes
-                        $key = ":mainTable" . $index;
-                        $placeholders[] = $key;
-                        $params[$key] = $value;
+                $marcadores = [];
+                foreach ($filtroTabelaPrincipal as $indice => $valor) {
+                    if ($valor !== '') {
+                        $chave = ":tabela" . $indice;
+                        $marcadores[] = $chave;
+                        $parametros[$chave] = $valor;
                     }
                 }
     
-                // Adiciona a cláusula IN
-                $clause = "main_table IN (" . implode(',', $placeholders) . ")";
-    
-                // Adiciona condições para NULL e string vazia, se necessário
-                if ($includeNullAndEmpty) {
-                    $clause .= " OR main_table IS NULL OR main_table = ''";
+                $partesClausula = [];
+                if (!empty($marcadores)) {
+                    $partesClausula[] = "main_table IN (" . implode(',', $marcadores) . ")";
                 }
     
-                $where[] = "($clause)";
+                if ($incluirNuloVazio) {
+                    $partesClausula[] = "main_table IS NULL OR main_table = ''";
+                }
+    
+                if (!empty($partesClausula)) {
+                    $condicoes[] = "(" . implode(' OR ', $partesClausula) . ")";
+                }
             }
         }
     
         try {
-            // Monta a query final
-            $query = "SELECT $colunasSQL FROM slow_logs " . (!empty($where) ? "WHERE " . implode(' AND ', $where) : '');
-            $stmt = Connection::conectar()->prepare($query);
+            $consulta = "SELECT $colunasSQL FROM slow_logs " . (!empty($condicoes) ? "WHERE " . implode(' AND ', $condicoes) : '');
+            $stmt = Connection::conectar()->prepare($consulta);
     
-            // Associa os valores dos parâmetros
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            foreach ($parametros as $chave => $valor) {
+                $stmt->bindValue($chave, $valor);
             }
     
             $stmt->execute();
     
-            // Retorna o SQL gerado e os dados
             return [
                 "sql" => $stmt->queryString,
                 "dados" => $stmt->fetchAll(PDO::FETCH_ASSOC)
             ];
         } catch (PDOException $e) {
-            // Log de erro para depuração
             error_log("Erro na consulta SQL: " . $e->getMessage());
             return ["error" => $e->getMessage()];
         }
     }
     
+    
+
 
 }

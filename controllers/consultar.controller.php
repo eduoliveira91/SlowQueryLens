@@ -2,9 +2,10 @@
 
 require_once __DIR__ . "/../models/consultar.models.php";
 
-class ControllerConsultar {
-    //uma função para carregar uma lista de checkboxes agrupando a informação do campo main_table da tabela logs.
-    public function gerarOpcoesMainTable() {
+class ControllerConsultar
+{
+    public function gerarOpcoesMainTable()
+    {
         $dados = ModelsConsultar::RetornaOpcoesMainTable();
 
         if (isset($dados['error'])) {
@@ -27,120 +28,145 @@ class ControllerConsultar {
         }
     }
 
-    public function validaPeriodo($datahoraInicio, $datahoraFim) {
+    public function listarIndices()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'listarIndices') {
+            $dados = ModelsConsultar::RetornaIndices();
+
+            if (isset($dados['error'])) {
+                echo json_encode(['error' => $dados['error']]);
+                return;
+            }
+
+            $indices = [];
+            foreach ($dados as $dado) {
+                if (!in_array($dado['Key_name'], $indices)) {
+                    $indices[] = $dado['Key_name'];
+                }
+            }
+
+            echo json_encode(['indices' => $indices]);
+        } else {
+            echo json_encode(['error' => 'Método de requisição inválido.']);
+        }
+    }
+
+
+    public function validaPeriodo($datahoraInicio, $datahoraFim)
+    {
         $datahoraInicio = DateTime::createFromFormat('Y-m-d H:i:s.u', $datahoraInicio);
         $datahoraFim = DateTime::createFromFormat('Y-m-d H:i:s.u', $datahoraFim);
-    
+
         if ($datahoraInicio && $datahoraFim) {
             return $datahoraInicio <= $datahoraFim;
         }
-    
+
         return false;
     }
 
-    public function processarConsulta() {
+    public function processarConsulta()
+    {
         $resultado = [];
-    
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'listarLogs') {
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'listarLogs') {
             $colunas = $_POST['colunas'] ?? [];
             $datahoraInicio = DateTime::createFromFormat('d/m/Y H:i:s', $_POST['datahoraInicio']);
             $datahoraFim = DateTime::createFromFormat('d/m/Y H:i:s', $_POST['datahoraFim']);
             $filtroSQL = $_POST['filtroSQL'] ?? '';
             $filtroMainTable = $_POST['filtroMainTable'] ?? [];
-    
-            // Verificar se as datas foram criadas corretamente
+
             if (!$datahoraInicio || !$datahoraFim) {
-                $resultado['error'] = 'Formato de data/hora inválido.';
-                echo json_encode($resultado);
-                exit;
+                $this->responderErro('Formato de data/hora inválido.');
+                return;
             }
-    
-            // Converter as datas para o formato esperado
+
             $datahoraInicio = $datahoraInicio->format('Y-m-d H:i:s') . '.000000';
             $datahoraFim = $datahoraFim->format('Y-m-d H:i:s') . '.999999';
-    
-            // Validar o período
+
             if (!$this->validaPeriodo($datahoraInicio, $datahoraFim)) {
-                $resultado['error'] = 'O período informado é inválido.';
-                echo json_encode($resultado);
-                exit;
+                $this->responderErro('O período informado é inválido.');
+                return;
             }
-    
-            // Validar colunas selecionadas
+
             if (empty($colunas)) {
-                $resultado['error'] = 'Nenhuma coluna foi selecionada.';
-                echo json_encode($resultado);
-                exit;
+                $this->responderErro('Nenhuma coluna foi selecionada.');
+                return;
             }
-    
-            // Consultar os logs no model
+
             $dados = ModelsConsultar::ConsultarLogs($colunas, $datahoraInicio, $datahoraFim, $filtroSQL, $filtroMainTable);
-    
+
             if (!empty($dados['dados'])) {
-                // Montar tabela
-                $tabela = '<table id="logsTable" class="table table-bordered table-striped dt-responsive tables" width="100%">';
-                $tabela .= '<thead><tr>';
-                foreach ($colunas as $coluna) {
-                    $tabela .= '<th>' . htmlspecialchars($coluna) . '</th>';
-                }
-                $tabela .= '</tr></thead><tbody>';
-                foreach ($dados['dados'] as $linha) {
-                    $tabela .= '<tr>';
-                    foreach ($colunas as $coluna) {
-                        if (in_array($coluna, ['time', 'start', 'end'])) {
-                            $dataHora = DateTime::createFromFormat('Y-m-d H:i:s.u', $linha[$coluna]);
-                            if ($dataHora) {
-                                $formattedDate = $dataHora->format('d/m/Y H:i:s');
-                                $microseconds = $dataHora->format('u');
-                                if ($microseconds != '000000') {
-                                    $formattedDate .= '.' . $microseconds;
-                                }
-                                $tabela .= '<td>' . $formattedDate . '</td>';
-                            } else {
-                                $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
-                            }
-                        } else {
-                            $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
-                        }
-                    }
-                    $tabela .= '</tr>';
-                }
-                $tabela .= '</tbody></table>';
-    
-                $resultado['table'] = $tabela;
-
+                $resultado['table'] = $this->montarTabela($dados['dados'], $colunas);
             } else {
-                if (isset($dados['error'])) {
-                    $resultado['error'] = $dados['error'];
-                } else {
-                    $resultado['error'] = 'Nenhum registro encontrado para os filtros aplicados.';
-                }
-
-                if (isset($dados['sql'])) {
-                    $resultado['sql'] = $dados['sql'];
-                }
+                $resultado['error'] = $dados['error'] ?? 'Nenhum registro encontrado.';
             }
 
             if (isset($dados['sql'])) {
                 $resultado['sql'] = $dados['sql'];
             }
-
         } else {
-            $resultado['error'] = 'Método de requisição inválido.';
+            $this->responderErro('Método de requisição inválido.');
+            return;
         }
 
-   
         header('Content-Type: application/json');
         echo json_encode($resultado);
-
     }
+
+    private function responderErro($mensagem)
+    {
+        echo json_encode(['error' => $mensagem]);
+        exit;
+    }
+
+    private function montarTabela($dados, $colunas)
+    {
+        $tabela = '<table id="logsTable" class="table table-bordered table-striped dt-responsive tables" width="100%">';
+        $tabela .= '<thead><tr>';
+        foreach ($colunas as $coluna) {
+            $tabela .= '<th>' . htmlspecialchars($coluna) . '</th>';
+        }
+        $tabela .= '</tr></thead><tbody>';
+        foreach ($dados as $linha) {
+            $tabela .= '<tr>';
+            foreach ($colunas as $coluna) {
+                if (in_array($coluna, ['time', 'start', 'end'])) {
+                    $tabela .= '<td>' . $this->formatarData($linha[$coluna]) . '</td>';
+                } else {
+                    $tabela .= '<td>' . htmlspecialchars($linha[$coluna]) . '</td>';
+                }
+            }
+            $tabela .= '</tr>';
+        }
+        $tabela .= '</tbody></table>';
+
+        return $tabela;
+    }
+
+    private function formatarData($data)
+    {
+        $dataHora = DateTime::createFromFormat('Y-m-d H:i:s.u', $data);
+        if ($dataHora) {
+            $formattedDate = $dataHora->format('d/m/Y H:i:s');
+            $microseconds = $dataHora->format('u');
+            return $microseconds != '000000' ? $formattedDate . '.' . $microseconds : $formattedDate;
+        }
+        return htmlspecialchars($data);
+    }
+
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $controller = new ControllerConsultar();
-    $controller->processarConsulta();
-}
+    $action = $_POST['action'] ?? '';
 
+    if ($action === 'listarLogs') {
+        $controller = new ControllerConsultar();
+        $controller->processarConsulta();
+    } elseif ($action === 'listarIndices') {
+        $controller = new ControllerConsultar();
+        $controller->listarIndices();
+    }
+}
 
 
 

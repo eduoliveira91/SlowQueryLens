@@ -1,9 +1,11 @@
 <?php
 require_once "connection.php";
 
-class ModelsImportar {
+class ModelsImportar
+{
 
-	static public function createTable($pdo) {
+	static public function createTable($pdo)
+	{
 		$sql = "
 		CREATE TABLE IF NOT EXISTS slow_logs (
 			insert_id BIGINT AUTO_INCREMENT PRIMARY KEY, 
@@ -40,7 +42,7 @@ class ModelsImportar {
 			main_table VARCHAR(100)
 		)";
 		$pdo->exec($sql);
-	
+
 		$pdo->exec("CREATE INDEX idx_slow_logs_time ON slow_logs(time)");
 		$pdo->exec("CREATE INDEX idx_slow_logs_user_host ON slow_logs(user_host(255))");
 		$pdo->exec("CREATE INDEX idx_slow_logs_query_time ON slow_logs(query_time)");
@@ -55,12 +57,12 @@ class ModelsImportar {
 		$pdo->exec("CREATE INDEX idx_slow_logs_main_table ON slow_logs(main_table)");
 	}
 
-	static public function gravaLogs($pdo, $dadosMinerados) {
-
+	static public function gravaLogs($pdo, $dadosMinerados)
+	{
 		$pdo->exec("DROP DATABASE IF EXISTS slow_logs_db");
 		$pdo->exec("CREATE DATABASE IF NOT EXISTS slow_logs_db");
 		$pdo->exec("USE slow_logs_db");
-	
+
 		self::createTable($pdo);
 
 		$stmt = $pdo->prepare("
@@ -70,7 +72,7 @@ class ModelsImportar {
 				:time, :user_host, :query_time, :lock_time, :rows_affected, :rows_sent, :rows_examined, :name_schema, LAST_INSERT_ID(), :sql_text, :thread_id, :errno, :killed, :bytes_received, :bytes_sent, :read_first, :read_last, :read_key, :read_next, :read_prev, :read_rnd, :read_rnd_next, :sort_merge_passes, :sort_range_count, :sort_rows, :sort_scan_count, :created_tmp_disk_tables, :created_tmp_tables, :start, :end, :main_table
 			)
 		");
-		
+
 		foreach ($dadosMinerados as $reg) {
 			// ignorar time não informado
 			if (!isset($reg['time'])) {
@@ -78,12 +80,12 @@ class ModelsImportar {
 			}
 
 			$stmt->execute([
-				':time' => isset($reg['time']) 
+				':time' => isset($reg['time'])
 					? (
-						($date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['time']) ?: DateTime::createFromFormat('Y-m-d H:i:s', $reg['time']) ?: DateTime::createFromFormat('ymd H:i:s', $reg['time'])) 
-						? $date->format('Y-m-d H:i:s.u') 
+						($date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['time']) ?: DateTime::createFromFormat('Y-m-d H:i:s', $reg['time']) ?: DateTime::createFromFormat('ymd H:i:s', $reg['time']))
+						? $date->format('Y-m-d H:i:s.u')
 						: '1970-01-01 00:00:01.000000'
-					) 
+					)
 					: '1970-01-01 00:00:01.000000',
 				':user_host' => isset($reg['user']) && isset($reg['host']) ? $reg['user'] . '@' . $reg['host'] : null,
 				':query_time' => isset($reg['query_time']) ? $reg['query_time'] : null,
@@ -112,13 +114,13 @@ class ModelsImportar {
 				':created_tmp_disk_tables' => $reg['created_tmp_disk_tables'] ?? 0,
 				':created_tmp_tables' => $reg['created_tmp_tables'] ?? 0,
 				':start' => isset($reg['start']) ? (
-					($startDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['start'])) 
-					? $startDate->format('Y-m-d H:i:s.u') 
+					($startDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['start']))
+					? $startDate->format('Y-m-d H:i:s.u')
 					: null
 				) : null,
 				':end' => isset($reg['end']) ? (
-					($endDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['end'])) 
-					? $endDate->format('Y-m-d H:i:s.u') 
+					($endDate = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $reg['end']))
+					? $endDate->format('Y-m-d H:i:s.u')
 					: null
 				) : null,
 				':main_table' => $reg['main_table'] ?? null
