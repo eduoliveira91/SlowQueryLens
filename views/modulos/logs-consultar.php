@@ -295,14 +295,12 @@ require_once "controllers/consultar.controller.php";
   $('#btConsultar').on('click', function (event) {
     event.preventDefault();
 
-    // Obtém o período selecionado
     let periodo = $('#periodo').val();
     if (!periodo) {
       alert('Período não pode ser vazio.');
       return;
     }
 
-    // Divide o valor do período
     let periodoArray = periodo.split(' - ');
     if (periodoArray.length !== 2) {
       alert('Formato de período inválido. Use o formato: DD/MM/YYYY HH:mm:ss - DD/MM/YYYY HH:mm:ss.');
@@ -312,20 +310,17 @@ require_once "controllers/consultar.controller.php";
     let datahoraInicio = periodoArray[0].trim();
     let datahoraFim = periodoArray[1].trim();
 
-    // Valida o formato das datas
     var dateTimeRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
     if (!dateTimeRegex.test(datahoraInicio) || !dateTimeRegex.test(datahoraFim)) {
       alert('Formato de data e hora inválido. Use o formato: DD/MM/YYYY HH:mm:ss.');
       return;
     }
 
-    // Valida se a data inicial é menor que a final
     if (new Date(datahoraInicio.split('/').reverse().join('-')) > new Date(datahoraFim.split('/').reverse().join('-'))) {
       alert('A data inicial não pode ser maior que a final.');
       return;
     }
 
-    // Coleta as colunas selecionadas selColunas e selColsExtra
     let colunasSelecionadas = [];
     $('#selColunas input[type="checkbox"]:checked').each(function () {
       colunasSelecionadas.push($(this).data('column'));
@@ -341,7 +336,6 @@ require_once "controllers/consultar.controller.php";
       return;
     }
 
-    // Coleta o filtro SQL (se habilitado)
     let filtroSQL = '';
     if ($('#usaFiltroSQL').is(':checked')) {
       filtroSQL = $('#filtroSQL').val().trim();
@@ -353,7 +347,6 @@ require_once "controllers/consultar.controller.php";
       }
     }
 
-    // Coleta os valores de main_table selecionados
     let mainTableSelecionadas = [];
     $('#filtroMainTable input[type="checkbox"]:checked').each(function () {
       mainTableSelecionadas.push($(this).val());
@@ -416,6 +409,9 @@ require_once "controllers/consultar.controller.php";
 
           $('#logsTable tbody td').css('word-break', 'break-word');
         }
+        // ajustar altura do main-sidebar para a altura da página
+        $('.main-sidebar').css('height', $('body').height() + 'px');
+
         /*
         if (response.sql) {
             if (response.sql) {

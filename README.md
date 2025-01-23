@@ -9,4 +9,4 @@ Com o intuito de fomentar a comunidade desenvolvedora e entusiastas de banco de 
 
 
 ## Configuração básica
-Configure a acesso ao database a partir do arquivo connection.php.
+Configure a acesso ao database a partir do arquivo models/connection.php.
